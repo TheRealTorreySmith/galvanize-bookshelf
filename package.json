@@ -27,15 +27,17 @@
   "homepage": "https://github.com/gschool/galvanize-bookshelf#readme",
   "dependencies": {
     "bcrypt": "1.0.2",
-    "body-parser": "^1.15.2",
+    "body-parser": "^1.18.2",
     "boom": "^3.2.2",
     "cookie-parser": "^1.4.3",
     "express": "^4.14.0",
+    "express-humps": "^0.1.0",
     "humps": "^1.1.0",
     "jsonwebtoken": "^7.1.9",
     "knex": "^0.11.7",
     "morgan": "^1.7.0",
-    "pg": "^6.0.0"
+    "pg": "^6.0.0",
+    "sqlite3": "^4.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
