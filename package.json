@@ -34,10 +34,9 @@
     "express-humps": "^0.1.0",
     "humps": "^1.1.0",
     "jsonwebtoken": "^7.1.9",
-    "knex": "^0.11.7",
+    "knex": "^0.11.10",
     "morgan": "^1.7.0",
-    "pg": "^6.0.0"
-
+    "pg": "^6.4.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",

@@ -13,6 +13,8 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
 const morgan = require('morgan');
 
+
+
 switch (app.get('env')) {
   case 'development':
     app.use(morgan('dev'));
@@ -27,6 +29,8 @@ switch (app.get('env')) {
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 const path = require('path');
 
@@ -46,10 +50,10 @@ const favorites = require('./routes/favorites');
 const token = require('./routes/token');
 const users = require('./routes/users');
 
-app.use(books);
+app.use('/books', books);
 app.use(favorites);
 app.use(token);
-app.use(users);
+app.use('/users', users);
 
 app.use((_req, res) => {
   res.sendStatus(404);

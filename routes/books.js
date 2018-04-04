@@ -1,61 +1,101 @@
-'use strict';
-
 const express = require('express');
-const bodyParser = require('body-parser')
+// const bodyParser = require('body-parser')
 const knex = require('../knex')
 const humps = require('humps')
-
-// eslint-disable-next-line new-cap
+// const jwt = require('jsonwebtoken');
 const router = express.Router();
+
 // YOUR CODE HERE
 
-router.use(bodyParser.json());
+//router.use(bodyParser.json());
 
-router.get('/books/:id', (req, res, next) => {
-  const { id } = req.params
+router.get('/', (req, res, next) => {
   knex('books')
     .orderBy('title')
-    .where('id', id)
-    .then(book => {
-      res.json(humps.camelizeKeys(book)[0])
-    })
-})
-
-router.get('/books', (req, res, next) => {
-  knex('books')
-    .orderBy('title')
-    .then(book => {
+    .then((book) => {
       res.json(humps.camelizeKeys(book))
     })
+    .catch((err) => {
+     next(err)
+   })
 })
 
-router.post('/books', (req, res, next) => {
+router.get('/:id', (req, res, next) => {
+  knex('books')
+    .where('id', req.params.id)
+    .orderBy('title')
+    .then((book) => {
+      res.json(humps.camelizeKeys(book)[0])
+    })
+    .catch((err) => {
+     next(err)
+   })
+})
+
+router.post('/', (req, res, next) => {
       knex('books')
-        .insert(humps.decamelizeKeys(req.body))
-        .insert(req.body['id'] = 9)
-        .then(book => {
-        res.status(200).json(humps.camelizeKeys(req.body))
+        .limit(1)
+        .insert(humps.decamelizeKeys({
+            title: req.body.title,
+            author: req.body.author,
+            genre: req.body.genre,
+            description: req.body.description,
+            coverUrl: req.body.coverUrl
+        }))
+        .returning('*')
+        .then((result) => {
+          res.json(humps.camelizeKeys(result[0]))
+        })
+      .catch((err) => {
+        next(err)
     })
 })
 
-router.patch('/books/:id', (req, res, next) => {
+router.patch('/:id', (req, res, next) => {
+      knex('books')
+        .where('id', req.params.id)
+        .limit(1)
+        .then((data) => {
+          if(!data) return next()
+          knex('books')
+          .update(humps.decamelizeKeys({
+              title: req.body.title,
+              author: req.body.author,
+              genre: req.body.genre,
+              description: req.body.description,
+              coverUrl: req.body.coverUrl
+          }))
+          .returning('*')
+          .then((result) => {
+            res.json(humps.camelizeKeys(result[0]))
+          })
+        })
+        .catch((err) => {
+          next(err)
+        })
+    })
 
-    //   knex('books')
-    //     .insert(humps.decamelizeKeys(req.body))
-    //     .insert(req.body['id'] = 1)
-    //     .then(book => {
-    //     res.status(200).json(humps.camelizeKeys(req.body))
-    // })
-
-    req.body['id'] = req.params.id
-    res.status(200).json(req.body)
-})
-
-router.delete('/books/:id', (req, res, next) => {
+router.delete('/:id', (req, res, next) => {
   knex('books')
-    .select('author', 'cover_url', 'description', 'genre', 'title')
-    .then(book => {
-      res.json(humps.camelizeKeys(book)[0])
+    .where('id', req.params.id)
+    .first()
+    .then((row) => {
+      if(!row) return next()
+      knex('books')
+        .del()
+        .where('id', req.params.id)
+        .then(() => {
+        res.json({
+          title: row.title,
+          author: row.author,
+          genre: row.genre,
+          description: row.description,
+          coverUrl: row.cover_url
+        })
+      })
+      .catch((err) => {
+        next(err)
+      })
     })
 })
 

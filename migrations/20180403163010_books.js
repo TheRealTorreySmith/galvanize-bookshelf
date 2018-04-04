@@ -1,9 +1,6 @@
-'use strict';
-
-
 exports.up = function(knex, Promise) {
     return knex.schema.createTable('books', (t) => {
-        t.increments('id').unsigned().primary();
+        t.increments();
         t.string('title').notNull().defaultTo('');
         t.string('author').notNull().defaultTo('');
         t.string('genre').notNull().defaultTo('');
