@@ -8,7 +8,6 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 
 
-
 router.post('/', (req, res, next) => {
   const password = req.body.password
     bcrypt.genSalt(10, function(err, salt) {
