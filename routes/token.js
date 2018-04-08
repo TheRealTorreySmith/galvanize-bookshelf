@@ -12,40 +12,8 @@ const key = process.env.JWT_KEY
 //USER INFO OBJECT
 let user = {}
 
-//FUNCTION THAT CONFIRMS EMAIL
-const checkEmail = (req,res,next) => {
-  knex('users')
-    .select('id','first_name','last_name','email', 'hashed_password')
-    .then((result) => {
-      user = result
-      let email = result[0].email
-      if (req.body.email !== email){
-        res.status(400)
-           .type('text/plain')
-           .send('Bad email or password')
-      } else {
-        next()
-      }
-    })
-}
-
-//FUNCTION THAT CONFIRMS PASSWORD
-const checkPass = (req,res,next) => {
-  const password = req.body.password
-  const hashed_password = user[0].hashed_password
-  bcrypt.compare(password, hashed_password, (error, response) => {
-    if (response !== true) {
-      res.status(400)
-      .type('text/plain')
-      .send('Bad email or password')
-    } else {
-      next()
-    }
-  })
-}
-
-//GET TOKEN
-router.get('/', (req, res, next) => {
+//FUNCTIONS FOR REQUESTS
+const getToken = (req, res, next) => {
   if (!req.cookies.token) {
     res.status(200).json(false)
   } else if (req.cookies.token) {
@@ -53,31 +21,71 @@ router.get('/', (req, res, next) => {
   } else {
     next()
   }
-})
+}
 
-//POST TOKEN USING JWT
-router.post('/', checkEmail, checkPass, (req, res, next) => {
+const checkEmail = (req,res,next) => {
+  knex('users')
+    .select('id','first_name','last_name','email', 'hashed_password')
+    .where('email', req.body.email)
+    .then((result) => {
+      user = result[0]
+      if (result[0] === undefined || req.body.email !== user.email){
+        res.status(400)
+           .type('text/plain')
+           .send('Bad email or password')
+      } else {
+      next()
+      }
+    })
+}
+
+const checkPass = (req,res,next) => {
+  knex('users')
+    .select('id','first_name','last_name','email','hashed_password')
+    .where('email', req.body.email)
+    .then((result) => {
+      const password = req.body.password
+      const hashed_password = user.hashed_password
+      bcrypt.compare(password, hashed_password, (error, response) => {
+        if (response !== true) {
+          res.status(400)
+          .type('text/plain')
+          .send('Bad email or password')
+        } else {
+          next()
+        }
+    })
+  })
+}
+
+const postToken = (req, res, next) => {
   const payload = req.body.email
   const token = jwt.sign(payload, 'key')
   res.cookie('token', `${token}`, { Path: '/', httpOnly: true })
      .status(200)
      .json({
-       id: user[0].id,
-       firstName: user[0].first_name,
-       lastName: user[0].last_name,
-       email: user[0].email
+       id: user.id,
+       firstName: user.first_name,
+       lastName: user.last_name,
+       email: user.email
      })
-})
+}
 
-//DELETE TOKEN
-router.delete('/', (req, res, next) => {
+const delToken = (req, res, next) => {
   const { email, password } = req.body
   knex('users')
+      // .where('token', res.cookie.token)
+      // .del()
       .then((result) => {
         res.cookie('token', '', { Path: '/', httpOnly: true })
            .status(200)
            .json(humps.camelizeKeys(result[0]))
       })
-})
+}
+
+//REQUEST HANDLERS
+router.get('/', getToken)
+router.post('/', checkEmail, checkPass, postToken)
+router.delete('/', delToken)
 
 module.exports = router;
