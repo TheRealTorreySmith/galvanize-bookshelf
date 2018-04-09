@@ -10,8 +10,7 @@ router.get('/', (req, res, next) => {
   knex('books')
     .orderBy('title')
     .then((book) => {
-      const books = humps.camelizeKeys(book)
-      res.send(books)
+      res.json(humps.camelizeKeys(book))
     })
     .catch((err) => {
      next(err)

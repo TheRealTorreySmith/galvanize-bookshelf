@@ -21,6 +21,7 @@ router.post('/', (req, res, next) => {
           })
           .returning(['id','first_name', 'last_name', 'email'])
             .then((result) => {
+              console.log(result)
               res.json(humps.camelizeKeys(result[0]))
             })
       })
