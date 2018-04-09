@@ -1,19 +1,17 @@
+'use strict';
+
 const express = require('express');
-// const bodyParser = require('body-parser')
 const knex = require('../knex')
 const humps = require('humps')
-// const jwt = require('jsonwebtoken');
 const router = express.Router();
-
 // YOUR CODE HERE
-
-//router.use(bodyParser.json());
 
 router.get('/', (req, res, next) => {
   knex('books')
     .orderBy('title')
     .then((book) => {
-      res.json(humps.camelizeKeys(book))
+      const books = humps.camelizeKeys(book)
+      res.send(books)
     })
     .catch((err) => {
      next(err)
