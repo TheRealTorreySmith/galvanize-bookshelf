@@ -8,7 +8,7 @@
     "knex": "knex",
     "lint": "eslint  --ignore-pattern public/js/vendor",
     "nf": "nf start",
-    "start": "node ./bin/www",
+    "start": "node server.js",
     "test": "mocha"
   },
   "repository": {
@@ -35,7 +35,7 @@
     "jsonwebtoken": "^7.1.9",
     "knex": "^0.11.10",
     "morgan": "^1.7.0",
-    "npm": "^5.6.0",
+    "npm": "^5.8.0",
     "pg": "^6.4.2"
   },
   "devDependencies": {
@@ -49,6 +49,6 @@
     "supertest": "^1.2.0"
   },
   "engines": {
-    "node": "9.9.0"
+    "node": "v9.9.0"
   }
 }
