@@ -1,12 +1,11 @@
-'use strict';
+'use strict'
 
 const express = require('express');
 const knex = require('../knex')
 const humps = require('humps')
 const router = express.Router();
 // YOUR CODE HERE
-
-router.get('/', (req, res, next) => {
+const getBook = (req, res, next) => {
   knex('books')
     .orderBy('title')
     .then((book) => {
@@ -15,9 +14,9 @@ router.get('/', (req, res, next) => {
     .catch((err) => {
      next(err)
    })
-})
+}
 
-router.get('/:id', (req, res, next) => {
+const getAllBooks = (req, res, next) => {
   knex('books')
     .where('id', req.params.id)
     .orderBy('title')
@@ -27,9 +26,9 @@ router.get('/:id', (req, res, next) => {
     .catch((err) => {
      next(err)
    })
-})
+}
 
-router.post('/', (req, res, next) => {
+const newBook = (req, res, next) => {
       knex('books')
         .limit(1)
         .insert(humps.decamelizeKeys({
@@ -46,9 +45,9 @@ router.post('/', (req, res, next) => {
       .catch((err) => {
         next(err)
     })
-})
+}
 
-router.patch('/:id', (req, res, next) => {
+const updateBooks = (req, res, next) => {
       knex('books')
         .where('id', req.params.id)
         .limit(1)
@@ -70,9 +69,9 @@ router.patch('/:id', (req, res, next) => {
         .catch((err) => {
           next(err)
         })
-    })
+    }
 
-router.delete('/:id', (req, res, next) => {
+const delBooks = (req, res, next) => {
   knex('books')
     .where('id', req.params.id)
     .first()
@@ -94,6 +93,64 @@ router.delete('/:id', (req, res, next) => {
         next(err)
       })
     })
-})
+}
+
+const checkBooks = (req, res, next) => {
+  knex('books')
+    .returning('books.id')
+    .then(data => {
+      let array = []
+          for (var i = 0; i < data.length; i++) {
+            array.push(data[i].id)
+          }
+          if (!array.includes(req.body.id)) {
+            res.status(404)
+              .type('text/plain')
+              .send('Not Found')
+            } else {
+              next()
+            }
+    })
+}
+
+const checkBookPosts = (req, res, next) => {
+  if (!req.body.title) {
+    res.status(400)
+      .type('text/plain')
+      .send('Title must not be blank')
+  } else if (!req.body.author) {
+    res.status(400)
+      .type('text/plain')
+      .send('Author must not be blank')
+  } else if (!req.body.genre) {
+    res.status(400)
+      .type('text/plain')
+      .send('Genre must not be blank')
+  } else if (!req.body.description) {
+    res.status(400)
+      .type('text/plain')
+      .send('Description must not be blank')
+  } else if (!req.body.coverUrl) {
+    res.status(400)
+      .type('text/plain')
+      .send('Cover URL must not be blank')
+  } else {
+    next()
+  }
+}
+
+//REQUEST HANDLERS
+router.get('/', getBook)
+router.get('/:id', getAllBooks)
+router.post('/', newBook)
+router.patch('/:id', updateBooks)
+router.delete('/:id', delBooks)
+
+// //BONUS REQEST HANDLERS
+// router.get('/', getAllBooks)
+// router.get('/:id', getBook)
+// router.post('/', checkBookPosts, newBook)
+// router.patch('/:id', checkBooks, updateBooks)
+// router.delete('/:id', checkBooks, delBooks)
 
 module.exports = router;

@@ -1,6 +1,6 @@
 'use strict';
 
-const express = require('express');
+const express = require('express')
 const knex = require('../knex')
 const humps = require('humps')
 const jwt = require('jsonwebtoken')
@@ -16,6 +16,52 @@ const tokenCheck = (req, res, next) => {
   } else {
     next()
   }
+}
+
+const checkId = (req, res, next) => {
+  if (Number.isInteger(req.body.bookId) == false) {
+    res.status(400)
+    .type('text/plain')
+    .send('Book ID must be an integer')
+  } else {
+    next()
+  }
+}
+
+const checkBook = (req, res, next) => {
+  knex('favorites')
+    .select('favorites.book_id')
+    .then(data => {
+      let array = []
+          for (var i = 0; i < data.length; i++) {
+            array.push(data[i].book_id)
+          }
+          if (!array.includes(req.body.book_id)) {
+            res.status(404)
+            .type('text/plain')
+            .send('Book not found')
+          } else {
+            next()
+          }
+    })
+}
+
+const checkFav = (req, res, next) => {
+  knex('favorites')
+    .select('favorites.book_id')
+    .then(data => {
+      let array = []
+          for (var i = 0; i < data.length; i++) {
+            array.push(data[i].book_id)
+          }
+          if (!array.includes(req.body.book_id)) {
+            res.status(404)
+            .type('text/plain')
+            .send('Favorite not found')
+          } else {
+            next()
+          }
+    })
 }
 
 const allFavs = (req, res, next) => {
@@ -59,9 +105,9 @@ const setFav = (req, res, next) => {
 
 const delFav = (req, res, next) => {
   knex('users')
+    .select('users.id')
     .then(allUsers => {
       knex('favorites')
-          .del()
           .where('book_id', req.body.bookId)
           .then((result) => {
             res.status(200)
@@ -79,4 +125,10 @@ router.get('/check?', tokenCheck, favId)
 router.post('/', tokenCheck, setFav)
 router.delete('/', tokenCheck, delFav)
 
-module.exports = router;
+// //BONUS REQEST HANDLERS
+// router.get('/', tokenCheck, allFavs)
+// router.get('/check?', tokenCheck, favId, checkId)
+// router.post('/', tokenCheck, checkId, checkBook, setFav)
+// router.delete('/', tokenCheck, checkId, checkFav, delFav)
+
+module.exports = router

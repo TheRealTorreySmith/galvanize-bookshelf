@@ -23,13 +23,33 @@ const getToken = (req, res, next) => {
   }
 }
 
+const emptyEmail = (req, res, next) => {
+  if(!req.body.email) {
+    res.status(400)
+    .type('text/plain')
+    .send('Email must not be blank')
+  } else {
+    next()
+  }
+}
+
+const emptyPass = (req, res, next) => {
+  if(!req.body.password) {
+    res.status(400)
+    .type('text/plain')
+    .send('Password must not be blank')
+  } else {
+    next()
+  }
+}
+
 const checkEmail = (req,res,next) => {
   knex('users')
     .select('id','first_name','last_name','email', 'hashed_password')
     .where('email', req.body.email)
     .then((result) => {
       user = result[0]
-      if (result[0] === undefined || req.body.email !== user.email){
+      if (user === undefined || req.body.email !== user.email){
         res.status(400)
            .type('text/plain')
            .send('Bad email or password')
@@ -74,8 +94,6 @@ const postToken = (req, res, next) => {
 const delToken = (req, res, next) => {
   const { email, password } = req.body
   knex('users')
-      // .where('token', res.cookie.token)
-      // .del()
       .then((result) => {
         res.cookie('token', '', { Path: '/', httpOnly: true })
            .status(200)
@@ -87,5 +105,8 @@ const delToken = (req, res, next) => {
 router.get('/', getToken)
 router.post('/', checkEmail, checkPass, postToken)
 router.delete('/', delToken)
+
+//BONUS REQUEST HANDLERS
+//router.post('/', emptyEmail, emptyPass, checkEmail, checkPass, postToken)
 
 module.exports = router;
