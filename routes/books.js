@@ -38,7 +38,6 @@ const newBook = (req, res, next) => {
             description: req.body.description,
             coverUrl: req.body.coverUrl
         }))
-        .returning('*')
         .then((result) => {
           res.json(humps.camelizeKeys(result[0]))
         })
@@ -48,28 +47,29 @@ const newBook = (req, res, next) => {
 }
 
 const updateBooks = (req, res, next) => {
+  knex('books')
+    .where('books.id', req.params.id)
+    .limit(1)
+    .then((data) => {
+      if (!data) {
+        return next()
+      }
       knex('books')
-        .where('id', req.params.id)
-        .limit(1)
-        .then((data) => {
-          if(!data) return next()
-          knex('books')
-          .update(humps.decamelizeKeys({
-              title: req.body.title,
-              author: req.body.author,
-              genre: req.body.genre,
-              description: req.body.description,
-              coverUrl: req.body.coverUrl
-          }))
-          .returning('*')
-          .then((result) => {
-            res.json(humps.camelizeKeys(result[0]))
-          })
+        .update(humps.decamelizeKeys({
+          title: req.body.title,
+          author: req.body.author,
+          genre: req.body.genre,
+          description: req.body.description,
+          coverUrl: req.body.coverUrl
+        }))
+        .then((result) => {
+          res.json(humps.camelizeKeys(result[0]))
         })
-        .catch((err) => {
-          next(err)
-        })
-    }
+    })
+    .catch((err) => {
+      next(err)
+    })
+}
 
 const delBooks = (req, res, next) => {
   knex('books')
@@ -95,49 +95,49 @@ const delBooks = (req, res, next) => {
     })
 }
 
-const checkBooks = (req, res, next) => {
-  knex('books')
-    .returning('books.id')
-    .then(data => {
-      let array = []
-          for (var i = 0; i < data.length; i++) {
-            array.push(data[i].id)
-          }
-          if (!array.includes(req.body.id)) {
-            res.status(404)
-              .type('text/plain')
-              .send('Not Found')
-            } else {
-              next()
-            }
-    })
-}
+// const checkBooks = (req, res, next) => {
+//   knex('books')
+//     .returning('books.id')
+//     .then(data => {
+//       let array = []
+//           for (var i = 0; i < data.length; i++) {
+//             array.push(data[i].id)
+//           }
+//           if (!array.includes(req.body.id)) {
+//             res.status(404)
+//               .type('text/plain')
+//               .send('Not Found')
+//             } else {
+//               next()
+//             }
+//     })
+// }
 
-const checkBookPosts = (req, res, next) => {
-  if (!req.body.title) {
-    res.status(400)
-      .type('text/plain')
-      .send('Title must not be blank')
-  } else if (!req.body.author) {
-    res.status(400)
-      .type('text/plain')
-      .send('Author must not be blank')
-  } else if (!req.body.genre) {
-    res.status(400)
-      .type('text/plain')
-      .send('Genre must not be blank')
-  } else if (!req.body.description) {
-    res.status(400)
-      .type('text/plain')
-      .send('Description must not be blank')
-  } else if (!req.body.coverUrl) {
-    res.status(400)
-      .type('text/plain')
-      .send('Cover URL must not be blank')
-  } else {
-    next()
-  }
-}
+// const checkBookPosts = (req, res, next) => {
+//   if (!req.body.title) {
+//     res.status(400)
+//       .type('text/plain')
+//       .send('Title must not be blank')
+//   } else if (!req.body.author) {
+//     res.status(400)
+//       .type('text/plain')
+//       .send('Author must not be blank')
+//   } else if (!req.body.genre) {
+//     res.status(400)
+//       .type('text/plain')
+//       .send('Genre must not be blank')
+//   } else if (!req.body.description) {
+//     res.status(400)
+//       .type('text/plain')
+//       .send('Description must not be blank')
+//   } else if (!req.body.coverUrl) {
+//     res.status(400)
+//       .type('text/plain')
+//       .send('Cover URL must not be blank')
+//   } else {
+//     next()
+//   }
+// }
 
 //REQUEST HANDLERS
 router.get('/', getBook)

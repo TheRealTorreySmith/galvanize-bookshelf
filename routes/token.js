@@ -23,25 +23,25 @@ const getToken = (req, res, next) => {
   }
 }
 
-const emptyEmail = (req, res, next) => {
-  if(!req.body.email) {
-    res.status(400)
-    .type('text/plain')
-    .send('Email must not be blank')
-  } else {
-    next()
-  }
-}
-
-const emptyPass = (req, res, next) => {
-  if(!req.body.password) {
-    res.status(400)
-    .type('text/plain')
-    .send('Password must not be blank')
-  } else {
-    next()
-  }
-}
+// const emptyEmail = (req, res, next) => {
+//   if(!req.body.email) {
+//     res.status(400)
+//     .type('text/plain')
+//     .send('Email must not be blank')
+//   } else {
+//     next()
+//   }
+// }
+//
+// const emptyPass = (req, res, next) => {
+//   if(!req.body.password) {
+//     res.status(400)
+//     .type('text/plain')
+//     .send('Password must not be blank')
+//   } else {
+//     next()
+//   }
+// }
 
 const checkEmail = (req,res,next) => {
   knex('users')
@@ -81,7 +81,7 @@ const checkPass = (req,res,next) => {
 const postToken = (req, res, next) => {
   const payload = req.body.email
   const token = jwt.sign(payload, 'key')
-  res.cookie('token', `${token}`, { Path: '/', httpOnly: true })
+  res.cookie('token', token, { Path: '/', httpOnly: true })
      .status(200)
      .json({
        id: user.id,
@@ -92,10 +92,10 @@ const postToken = (req, res, next) => {
 }
 
 const delToken = (req, res, next) => {
-  const { email, password } = req.body
+const { email, password } = req.body
   knex('users')
       .then((result) => {
-        res.cookie('token', '', { Path: '/', httpOnly: true })
+        res.clearCookie('token', '', { Path: '/', httpOnly: true })
            .status(200)
            .json(humps.camelizeKeys(result[0]))
       })
